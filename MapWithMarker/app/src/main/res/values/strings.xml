@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Findtographer</string>
+    <string name="title_activity_maps">Findtographer</string>
+    <string name="pick_date">Set Date</string>
+    <string name="pick_time">Set Time</string>
+    <string name="notification_title">Findtographer Match</string>
+    <string name="notification_content">Tap to see photographers in your area</string>
+</resources>
