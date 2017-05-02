@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Findtographer</string>
-    <string name="title_activity_maps">Findtographer</string>
+    <string name="title_activity_maps"> Findtographer</string>
     <string name="pick_date">Set Date</string>
     <string name="pick_time">Set Time</string>
     <string name="intro">Welcome to Findtographer!</string>

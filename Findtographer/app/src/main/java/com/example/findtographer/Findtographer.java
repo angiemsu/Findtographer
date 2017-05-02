@@ -1,6 +1,5 @@
-package com.example.mapwithmarker;
+package com.example.findtographer;
 
-import android.*;
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -52,12 +51,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import static com.example.mapwithmarker.R.id.web;
+import static com.example.findtographer.R.id.web;
 
 /**
  * An activity that displays a Google map with a marker (pin) to indicate a particular location.
  */
-public class MapsMarkerActivity extends AppCompatActivity
+public class Findtographer extends AppCompatActivity
         implements OnMapReadyCallback, ConnectionCallbacks, OnConnectionFailedListener, View.OnClickListener {
 
     protected static final String TAG = "MapsMarkerActivity";
@@ -85,6 +84,9 @@ public class MapsMarkerActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
+
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.ic_stat_name);
 
         tabs = (TabHost) findViewById(R.id.tabhost);
         tabs.setup();
