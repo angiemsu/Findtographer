@@ -3,6 +3,9 @@
     <string name="title_activity_maps">Findtographer</string>
     <string name="pick_date">Set Date</string>
     <string name="pick_time">Set Time</string>
+    <string name="intro">Welcome to Findtographer!</string>
+    <string name="subintro">The photoshoot will be in: </string>
+    <string name="location">Use current location</string>
     <string name="notification_title">Findtographer Match</string>
     <string name="notification_content">Tap to see photographers in your area</string>
 </resources>

@@ -64,8 +64,8 @@ public class MapsMarkerActivity extends AppCompatActivity
     private Button buttonA, call;
     private Button go2;
     private WebView webView;
-    private TextView tview, text3;
-    private EditText text, text2;
+    private TextView text3;
+    private EditText text2;
     private static TabHost tabs;
     /**
      * Provides the entry point to Google Play services.
@@ -85,28 +85,23 @@ public class MapsMarkerActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
-        // Get the SupportMapFragment and request notification
-        // when the map is ready to be used.
 
-        TabHost tabs = (TabHost) findViewById(R.id.tabhost);
+        tabs = (TabHost) findViewById(R.id.tabhost);
         tabs.setup();
-
         TabHost.TabSpec spec;
 
         // Initialize a TabSpec for tab1 and add it to the TabHost
         spec = tabs.newTabSpec("tag1");    //create new tab specification
         spec.setContent(R.id.tab1);    //add tab view content
-        spec.setIndicator("Location");    //put text on tab
+        spec.setIndicator("Schedule shoot");    //put text on tab
         tabs.addTab(spec);             //put tab in TabHost container
 
         buttonA = (Button) findViewById(R.id.buttonA);
-
         buttonA.setOnClickListener(this);
-
-
         webView = (WebView) findViewById(web);
 
-
+        // Get the SupportMapFragment and request notification
+        // when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -119,8 +114,8 @@ public class MapsMarkerActivity extends AppCompatActivity
 
         go2 = (Button) findViewById(R.id.go2);
         call = (Button) findViewById(R.id.call);
-        text3 = (TextView) findViewById(R.id.text3);
         call.setOnClickListener(this);
+        text3 = (TextView) findViewById(R.id.text3);
         text2 = (EditText) findViewById(R.id.text2);
         webView.setWebViewClient(new WebViewClient());
 
@@ -129,28 +124,24 @@ public class MapsMarkerActivity extends AppCompatActivity
             public void onClick(View v) {
                 webView.getSettings().setJavaScriptEnabled(true);
                 String url_str="";
-                String price="";
-                String title="";
+                String desc="";
                 if (text2.getText().toString().contains("Wedding") ) {
                    url_str = "https://lisarigbyphotography.com";//"http://www.lenapetersonphotography.com";
-                    price="Lisa Rigby. Price: $250-1000. Contact: lisa@lisarigbyphotography.com ";//"Leena Peterson. Price: $250-1000. Contact: info@lenapetersonphotography.com";
-                    //title="Leena Peterson";
+                    desc="Lisa Rigby. Price: $250-1000. Contact: lisa@lisarigbyphotography.com ";//"Leena Peterson. Price: $250-1000. Contact: info@lenapetersonphotography.com";
                 }
                 else if (text2.getText().toString().contains("Fashion")) {
                     url_str = "https://anna-tabakova.squarespace.com/";
-                    price="Anna Tabakova. Price: $100-500. Contact: tabakovaannaph@gmail.com";
-                    //title="Anna Tabakova";
+                    desc="Anna Tabakova. Price: $100-500. Contact: tabakovaannaph@gmail.com";
                 }
                 else {
                     url_str = "http://www.facebook.com/AngelaSuPhotography";
-                    price="Angela Su. Price: $50-250. Contact: angiemsu@gmail.com";
-                    //title="Angela Su";
+                    desc="Angela Su. Price: $50-250. Contact: angiemsu@gmail.com";
                 }
 
                 webView.loadUrl(url_str);//text2.getText().toString());
 
                 text2.setText("");
-                text3.setText(price);
+                text3.setText(desc);
 
             }
         });
@@ -160,7 +151,7 @@ public class MapsMarkerActivity extends AppCompatActivity
             public boolean onKey(View view, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
                     webView.getSettings().setJavaScriptEnabled(true);
-                    webView.loadUrl(text.getText().toString());
+                    webView.loadUrl(text2.getText().toString());
                     return true;
                 }
                 return false;
@@ -453,7 +444,7 @@ public class MapsMarkerActivity extends AppCompatActivity
     public void callNotification(Context context/* TODO: Location location */) {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.notification_icon_24dp)
+                        .setSmallIcon(R.drawable.ic_stat_name)
                         .setContentTitle(context.getText(R.string.notification_title))
                         .setContentText(context.getText(R.string.notification_content));
 
