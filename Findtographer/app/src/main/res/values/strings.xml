@@ -8,4 +8,7 @@
     <string name="location">Use current location</string>
     <string name="notification_title">Findtographer Match</string>
     <string name="notification_content">Tap to see photographers in your area</string>
+    <string name="title_activity_login">Sign in</string>
+    <string name="title_activity_photographer">Findtographer</string>
+    <string name="login_intro">Welcome! Select your user type: </string>
 </resources>

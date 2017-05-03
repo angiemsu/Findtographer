@@ -111,7 +111,7 @@ public class Findtographer extends AppCompatActivity
         // Initialize a TabSpec for tab2 and add it to the TabHost
         spec = tabs.newTabSpec("tag2");        //create new tab specification
         spec.setContent(R.id.tab2);            //add view tab content
-        spec.setIndicator("Photographers");
+        spec.setIndicator("Portfolios");
         tabs.addTab(spec);                    //put tab in TabHost container
 
         go2 = (Button) findViewById(R.id.go2);
