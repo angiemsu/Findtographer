@@ -107,7 +107,7 @@ public class Findtographer extends AppCompatActivity
         public void handleMessage(Message msg) {
             String title = (String) msg.obj;
 
-            desc_text.append(title); /* TODO: use json info for profile */
+            desc_text.append(title);  //use json info for profile
             //enter.setVisibility(View.GONE);
             //url.setVisibility(View.GONE);
             desc_text.setVisibility(View.VISIBLE);
@@ -241,11 +241,6 @@ public class Findtographer extends AppCompatActivity
         url_str = "";
         String desc = "";
 
-        /** TODO: change if to switch statement
-        switch (position) {
-            case 0:
-        }
-         **/
         if (type.getText().toString().contains("Wedding")) {
             url_str = "https://www.catherineohara.com";
 
@@ -591,8 +586,6 @@ public class Findtographer extends AppCompatActivity
                 String title = obj.getJSONObject("website").getString("siteTitle");
                 Log.i("JSON", "title " + title);
 
-
-
                 /**
                  String desc = obj.getJSONObject("website").getString("siteDescription");
                  Log.i("JSON", "description " + desc);
@@ -602,15 +595,11 @@ public class Findtographer extends AppCompatActivity
                  Log.i("JSON", "phone " + phone);
                  **/
 
-
-
                 Message msg = handler.obtainMessage();
                 Message msg2 = handler.obtainMessage();
                 msg.obj = title;
                 msg2.obj =
                 handler.sendMessage(msg);
-
-
 
             } catch (JSONException e) {
                 e.getMessage();

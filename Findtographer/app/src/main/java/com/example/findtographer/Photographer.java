@@ -62,7 +62,7 @@ public class Photographer extends AppCompatActivity {
             String title = (String) msg.obj;
 
            while (siteDesc.getText().toString() == "")
-               siteDesc.append(title); /* TODO: use json info for profile */
+               siteDesc.append(title); //use json info for profile
             enter.setVisibility(View.GONE);
             url.setVisibility(View.GONE);
             siteDesc.setVisibility(View.VISIBLE);
