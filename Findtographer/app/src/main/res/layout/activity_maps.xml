@@ -59,7 +59,7 @@
                             android:layout_height="wrap_content"
                             android:id="@+id/city"
                             android:hint="your city"
-                            android:inputType="textCapSentences"
+                            android:inputType="textCapSentences|textNoSuggestions"
                             android:paddingLeft="10dp"
                             android:textSize="16dp"/>
 
@@ -131,6 +131,14 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
+
+                <ListView
+                    android:id="@+id/list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -141,35 +149,34 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1.0"
-                        android:hint="type category here"
-                        android:inputType="textCapSentences|textMultiLine"
-                        android:maxLength="2000"
-                        android:maxLines="4"
+                        android:hint="enter new category"
+                        android:inputType="textCapSentences|textMultiLine|textNoSuggestions"
+                        android:textSize="15dp"
                         android:paddingLeft="10dp" />
 
                     <Button
                         android:id="@+id/go2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Go" />
+                        android:paddingBottom="2dp"
+                        android:maxHeight="14dp"
+                        android:text="Add" />
 
                 </LinearLayout>
+
 
                 <TextView
                     android:id="@+id/text3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="5dp"
+                    android:background="#79CDCD"
                     android:paddingLeft="10dp"
+                    android:visibility="gone"
+                    android:paddingBottom="5dp"
+                    android:paddingTop="5dp"
                     android:lineSpacingExtra="1dp"
                     android:textColor="#ff000000" />
 
-                <Button
-                    android:id="@+id/call"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#79CDCD"
-                    android:text="Call" />
 
                 <WebView
                     android:id="@+id/web"

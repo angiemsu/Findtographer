@@ -1,5 +1,7 @@
 package com.example.findtographer;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,6 +22,10 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.vision.text.Text;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,8 +51,10 @@ public class Photographer extends AppCompatActivity {
 
     private WebView webview;
     private EditText url;
+    private TextView enter;
     private TextView siteDesc;
     private FloatingActionButton fab;
+
 
     //messages from background thread contain data for UI
     Handler handler = new Handler() {
@@ -55,7 +63,11 @@ public class Photographer extends AppCompatActivity {
 
            while (siteDesc.getText().toString() == "")
                siteDesc.append(title); /* TODO: use json info for profile */
+            enter.setVisibility(View.GONE);
+            url.setVisibility(View.GONE);
             siteDesc.setVisibility(View.VISIBLE);
+
+
         }
     };
 
@@ -71,6 +83,8 @@ public class Photographer extends AppCompatActivity {
 
         webview = (WebView) findViewById(web1);
         webview.setWebViewClient(new WebViewClient());
+
+        enter = (TextView) findViewById(R.id.enterLink);
 
         // background thread is json parser
         final Thread t = new Thread(background);
@@ -101,7 +115,7 @@ public class Photographer extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Creating profile...", Snackbar.LENGTH_SHORT)
+                Snackbar.make(view, "Profile created", Snackbar.LENGTH_SHORT)
                         .setDuration(500)
                         .setAction("Action", null).show();
 
@@ -206,9 +220,13 @@ public class Photographer extends AppCompatActivity {
                  Log.i("JSON", "phone " + phone);
                  **/
 
+
+
                 Message msg = handler.obtainMessage();
-               msg.obj = title;
+                msg.obj = title;
                 handler.sendMessage(msg);
+
+
 
             } catch (JSONException e) {
                 e.getMessage();

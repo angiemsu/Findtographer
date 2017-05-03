@@ -4,5 +4,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/switchv"  android:title="Switch to photographer" />
     <item android:id="@+id/back"  android:title="Back to login" />
+    <item android:id="@+id/delete"  android:title="Delete category" />
+
+
 
 </menu>

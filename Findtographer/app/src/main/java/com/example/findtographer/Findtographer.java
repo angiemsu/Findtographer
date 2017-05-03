@@ -14,11 +14,16 @@ import android.location.Location;
 import android.os.Build;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 
 import android.util.Log;
@@ -28,12 +33,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -52,6 +61,22 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static android.R.id.input;
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
+import static com.example.findtographer.R.id.siteDesc;
+import static com.example.findtographer.R.id.text3;
 import static com.example.findtographer.R.id.web;
 import static junit.framework.Assert.assertTrue;
 
@@ -59,16 +84,36 @@ import static junit.framework.Assert.assertTrue;
  * An activity that displays a Google map with a marker (pin) to indicate a particular location.
  */
 public class Findtographer extends AppCompatActivity
-        implements OnMapReadyCallback, ConnectionCallbacks, OnConnectionFailedListener, View.OnClickListener {
+        implements AdapterView.OnItemClickListener, OnMapReadyCallback, ConnectionCallbacks, OnConnectionFailedListener, View.OnClickListener {
 
     protected static final String TAG = "MapsMarkerActivity";
-    private Button current, call;
+    private Button current;
     private Button go;
     private WebView webView;
     private TextView desc_text;
-    private EditText url_txt, city;
+    private EditText type, city;
     private String  streetAddr;
     private static TabHost tabs;
+    private ListView listview;
+    private int selected;
+    private String url_str;
+    private ArrayAdapter<String> arrayad;
+    private ArrayList<String> arrayList;
+    private Thread t=null;
+    private String[] items = {"Wedding","Fashion"};
+
+    //messages from background thread contain data for UI
+    Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            String title = (String) msg.obj;
+
+            desc_text.append(title); /* TODO: use json info for profile */
+            //enter.setVisibility(View.GONE);
+            //url.setVisibility(View.GONE);
+            desc_text.setVisibility(View.VISIBLE);
+        }
+    };
+
     /**
      * Provides the entry point to Google Play services.
      */
@@ -89,19 +134,19 @@ public class Findtographer extends AppCompatActivity
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.ic_stat_name);
 
+        listview = (ListView) findViewById(R.id.list);
+
         current = (Button) findViewById(R.id.buttonA);
         current.setOnClickListener(this);
 
-        call = (Button) findViewById(R.id.call);
-        call.setOnClickListener(this);
-
         go = (Button) findViewById(R.id.go2);
+        go.setOnClickListener(this);
 
         webView = (WebView) findViewById(web);
         webView.setWebViewClient(new WebViewClient());
 
-        url_txt = (EditText) findViewById(R.id.text2);
-        desc_text = (TextView) findViewById(R.id.text3);
+        type = (EditText) findViewById(R.id.text2);
+        desc_text = (TextView) findViewById(text3);
         city = (EditText) findViewById(R.id.city);
 
         tabs = (TabHost) findViewById(R.id.tabhost);
@@ -120,11 +165,29 @@ public class Findtographer extends AppCompatActivity
         spec.setIndicator("Portfolios");
         tabs.addTab(spec);
 
+        // background thread is json parser
+        t = new Thread(background);
+
+        // Create a List from String Array elements
+        arrayList = new ArrayList<String>(Arrays.asList(items));
+
+        // Set listener
+        listview.setOnItemClickListener(this);
+
+        // Create an ArrayAdapter from List
+        arrayad = new ArrayAdapter<String>
+                (this, android.R.layout.simple_list_item_1, arrayList);
+
+        // DataBind ListView with items from ArrayAdapter
+        listview.setAdapter(arrayad);
+        arrayad.notifyDataSetChanged();
+
         // Get the SupportMapFragment and request notification
         // when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
         // city from edit text loaded on enter key
         city.setOnKeyListener(new View.OnKeyListener() {
@@ -147,38 +210,58 @@ public class Findtographer extends AppCompatActivity
             });
 
         //set listeners for web tab
+        // add button adds new item
         go.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                webView.getSettings().setJavaScriptEnabled(true);
-                String url_str = "";
-                String desc = "";
-                if (url_txt.getText().toString().contains("Wedding")) {
-                    url_str = "https://lisarigbyphotography.com";//"http://www.lenapetersonphotography.com";
-                    desc = "Lisa Rigby. Price: $250-1000. Contact: lisa@lisarigbyphotography.com ";//"Leena Peterson. Price: $250-1000. Contact: info@lenapetersonphotography.com";
-                } else if (url_txt.getText().toString().contains("Fashion")) {
-                    url_str = "https://anna-tabakova.squarespace.com/";
-                    desc = "Anna Tabakova. Price: $100-500. Contact: tabakovaannaph@gmail.com";
-                } else {
-                    url_str = "http://www.facebook.com/AngelaSuPhotography";
-                    desc = "Angela Su. Price: $50-250. Contact: angiemsu@gmail.com";
-                }
 
-                webView.loadUrl(url_str);
-                url_txt.setText("");
-                desc_text.setText(desc);
+                String new_item = type.getText().toString();
+                arrayad.add(new_item);
+                arrayad.notifyDataSetChanged();
             }
         });
 
-        url_txt.setOnKeyListener(new View.OnKeyListener() {
+        type.setOnKeyListener(new View.OnKeyListener() {
             public boolean onKey(View view, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
                     webView.getSettings().setJavaScriptEnabled(true);
-                    webView.loadUrl(url_txt.getText().toString());
+                    webView.loadUrl(type.getText().toString());
                     return true;
                 }
                 return false;
             }
         });
+    }
+
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        // when click item, displays in EditText
+        type.setText(arrayad.getItem(position));
+        selected = position;
+
+        webView.getSettings().setJavaScriptEnabled(true);
+        url_str = "";
+        String desc = "";
+
+        /** TODO: change if to switch statement
+        switch (position) {
+            case 0:
+        }
+         **/
+        if (type.getText().toString().contains("Wedding")) {
+            url_str = "https://www.catherineohara.com";
+
+        } else if (type.getText().toString().contains("Fashion")) {
+            url_str = "https://anna-tabakova.squarespace.com";
+        } else {
+            url_str = "https://www.crimsonphotos.ca";
+        }
+
+        t.start();
+
+        webView.loadUrl(url_str);
+        type.setText("");
+        desc_text.setText(desc);
+        desc_text.setVisibility(View.VISIBLE);
+        arrayad.notifyDataSetChanged();
     }
 
     private void geocode() throws Exception{
@@ -307,25 +390,29 @@ public class Findtographer extends AppCompatActivity
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(test, 16));
                     myRef.setValue(mLastLocation);
                 }
-                //sleep
-                try {
-                    Thread.sleep(1000);                 //1000 milliseconds is one second.
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-                ;
-                callNotification(this);
+                /** TODO: notifcations
+                 //sleep
+                 try {
+                 Thread.sleep(1000);                 //1000 milliseconds is one second.
+                 } catch (InterruptedException ex) {
+                 Thread.currentThread().interrupt();
+                 }
+                 ;
+                 callNotification(this);
+                 **/
                 break;
 
-            // intent to call dialer
-            case R.id.call:
-                Uri uri3 = Uri.parse("tel:5089511273");
-                Intent i3 = new Intent(Intent.ACTION_CALL, uri3);
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
-                startActivity(i3);
-                break;
+            /** TODO add call back
+             // intent to call dialer
+             case call:
+             Uri uri3 = Uri.parse("tel:5089511273");
+             Intent i3 = new Intent(Intent.ACTION_CALL, uri3);
+             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+             return;
+             }
+             startActivity(i3);
+             break;
+             **/
         }
     }
 
@@ -434,7 +521,102 @@ public class Findtographer extends AppCompatActivity
                 intent = new Intent(this, Login.class);
                 startActivity(intent);
                 break;
+
+            case R.id.delete:
+
+                arrayList.remove(selected);
+                arrayad.notifyDataSetChanged();
+                break;
         }
         return true;
     }
+
+    //thread connects to portfolio, gets response code, JSON search results,
+    //places data into Log and sends messages to display data on UI
+    Runnable background = new Runnable() {
+        public void run() {
+
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
+
+            StringBuilder builder = new StringBuilder();
+            String Url = url_str+"/?format=json"; //get squarespace json
+            InputStream is = null;
+
+            try {
+                URL url = new URL(Url);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+                conn.setReadTimeout(10000 /* milliseconds */);
+                conn.setConnectTimeout(15000 /* milliseconds */);
+                conn.setRequestMethod("GET");
+                conn.setDoInput(true);
+                // Starts the query
+                conn.connect();
+                int response = conn.getResponseCode();
+                Log.e("JSON", "The response is: " + response);
+                //if response code not 200, end thread
+                if (response != 200) return;
+                is = conn.getInputStream();
+
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(is));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
+                }
+
+                // Makes sure that the InputStream is closed after the app is
+                // finished using it.
+            } catch (IOException e) {
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+
+            //convert StringBuilder to String
+            String readJSONFeed = builder.toString();
+            Log.e("JSON", readJSONFeed);
+
+            //decode JSON
+            try {
+
+                JSONObject obj = new JSONObject(readJSONFeed);
+
+                String title = obj.getJSONObject("website").getString("siteTitle");
+                Log.i("JSON", "title " + title);
+
+
+
+                /**
+                 String desc = obj.getJSONObject("website").getString("siteDescription");
+                 Log.i("JSON", "description " + desc);
+                 String email = obj.getJSONObject("website").getString("contactEmail");
+                 Log.i("JSON", "email " + email);
+                 String phone = obj.getJSONObject("website").getString("contactPhoneNumber");
+                 Log.i("JSON", "phone " + phone);
+                 **/
+
+
+
+                Message msg = handler.obtainMessage();
+                Message msg2 = handler.obtainMessage();
+                msg.obj = title;
+                msg2.obj =
+                handler.sendMessage(msg);
+
+
+
+            } catch (JSONException e) {
+                e.getMessage();
+                e.printStackTrace();
+            }
+        }
+
+    };
 }

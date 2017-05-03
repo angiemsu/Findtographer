@@ -54,6 +54,7 @@
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:gravity="center"
+            android:inputType="textNoSuggestions"
             android:hint="https://www.example.com"
             android:paddingBottom="7dp"
             android:textSize="16dp"
