@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.icu.util.Calendar;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.net.Uri;
@@ -46,14 +47,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 
-import java.net.MalformedURLException;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import static com.example.findtographer.R.id.web;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * An activity that displays a Google map with a marker (pin) to indicate a particular location.
@@ -62,11 +62,12 @@ public class Findtographer extends AppCompatActivity
         implements OnMapReadyCallback, ConnectionCallbacks, OnConnectionFailedListener, View.OnClickListener {
 
     protected static final String TAG = "MapsMarkerActivity";
-    private Button buttonA, call;
-    private Button go2;
+    private Button current, call;
+    private Button go;
     private WebView webView;
-    private TextView text3;
-    private EditText text2;
+    private TextView desc_text;
+    private EditText url_txt, city;
+    private String  streetAddr;
     private static TabHost tabs;
     /**
      * Provides the entry point to Google Play services.
@@ -77,9 +78,7 @@ public class Findtographer extends AppCompatActivity
      * Represents a geographical location.
      */
     protected Location mLastLocation;
-
     private GoogleMap googleMap;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +88,21 @@ public class Findtographer extends AppCompatActivity
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.ic_stat_name);
+
+        current = (Button) findViewById(R.id.buttonA);
+        current.setOnClickListener(this);
+
+        call = (Button) findViewById(R.id.call);
+        call.setOnClickListener(this);
+
+        go = (Button) findViewById(R.id.go2);
+
+        webView = (WebView) findViewById(web);
+        webView.setWebViewClient(new WebViewClient());
+
+        url_txt = (EditText) findViewById(R.id.text2);
+        desc_text = (TextView) findViewById(R.id.text3);
+        city = (EditText) findViewById(R.id.city);
 
         tabs = (TabHost) findViewById(R.id.tabhost);
         tabs.setup();
@@ -100,9 +114,11 @@ public class Findtographer extends AppCompatActivity
         spec.setIndicator("Schedule shoot");    //put text on tab
         tabs.addTab(spec);             //put tab in TabHost container
 
-        buttonA = (Button) findViewById(R.id.buttonA);
-        buttonA.setOnClickListener(this);
-        webView = (WebView) findViewById(web);
+        // Initialize a TabSpec for tab2 and add it to the TabHost
+        spec = tabs.newTabSpec("tag2");
+        spec.setContent(R.id.tab2);
+        spec.setIndicator("Portfolios");
+        tabs.addTab(spec);
 
         // Get the SupportMapFragment and request notification
         // when the map is ready to be used.
@@ -110,52 +126,54 @@ public class Findtographer extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        // Initialize a TabSpec for tab2 and add it to the TabHost
-        spec = tabs.newTabSpec("tag2");        //create new tab specification
-        spec.setContent(R.id.tab2);            //add view tab content
-        spec.setIndicator("Portfolios");
-        tabs.addTab(spec);                    //put tab in TabHost container
+        // city from edit text loaded on enter key
+        city.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+                public boolean onKey(View view, int keyCode, KeyEvent event) {
+                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
 
-        go2 = (Button) findViewById(R.id.go2);
-        call = (Button) findViewById(R.id.call);
-        call.setOnClickListener(this);
-        text3 = (TextView) findViewById(R.id.text3);
-        text2 = (EditText) findViewById(R.id.text2);
-        webView.setWebViewClient(new WebViewClient());
+                        streetAddr = city.getText().toString();
+                        try {
+                            geocode();
+                        }
+                        catch(Exception e){
+                            System.out.print("exception caught");
+                        }
+
+                        return true;
+                    }
+                    return false;
+                }
+            });
 
         //set listeners for web tab
-        go2.setOnClickListener(new View.OnClickListener() {
+        go.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 webView.getSettings().setJavaScriptEnabled(true);
-                String url_str="";
-                String desc="";
-                if (text2.getText().toString().contains("Wedding") ) {
-                   url_str = "https://lisarigbyphotography.com";//"http://www.lenapetersonphotography.com";
-                    desc="Lisa Rigby. Price: $250-1000. Contact: lisa@lisarigbyphotography.com ";//"Leena Peterson. Price: $250-1000. Contact: info@lenapetersonphotography.com";
-                }
-                else if (text2.getText().toString().contains("Fashion")) {
+                String url_str = "";
+                String desc = "";
+                if (url_txt.getText().toString().contains("Wedding")) {
+                    url_str = "https://lisarigbyphotography.com";//"http://www.lenapetersonphotography.com";
+                    desc = "Lisa Rigby. Price: $250-1000. Contact: lisa@lisarigbyphotography.com ";//"Leena Peterson. Price: $250-1000. Contact: info@lenapetersonphotography.com";
+                } else if (url_txt.getText().toString().contains("Fashion")) {
                     url_str = "https://anna-tabakova.squarespace.com/";
-                    desc="Anna Tabakova. Price: $100-500. Contact: tabakovaannaph@gmail.com";
-                }
-                else {
+                    desc = "Anna Tabakova. Price: $100-500. Contact: tabakovaannaph@gmail.com";
+                } else {
                     url_str = "http://www.facebook.com/AngelaSuPhotography";
-                    desc="Angela Su. Price: $50-250. Contact: angiemsu@gmail.com";
+                    desc = "Angela Su. Price: $50-250. Contact: angiemsu@gmail.com";
                 }
 
-                webView.loadUrl(url_str);//text2.getText().toString());
-
-                text2.setText("");
-                text3.setText(desc);
-
+                webView.loadUrl(url_str);
+                url_txt.setText("");
+                desc_text.setText(desc);
             }
         });
 
-        //206.486.2983
-        text2.setOnKeyListener(new View.OnKeyListener() {
+        url_txt.setOnKeyListener(new View.OnKeyListener() {
             public boolean onKey(View view, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
                     webView.getSettings().setJavaScriptEnabled(true);
-                    webView.loadUrl(text2.getText().toString());
+                    webView.loadUrl(url_txt.getText().toString());
                     return true;
                 }
                 return false;
@@ -163,10 +181,18 @@ public class Findtographer extends AppCompatActivity
         });
     }
 
+    private void geocode() throws Exception{
+        // forward geocoding
+        Geocoder fwd = new Geocoder(this);
+        android.location.Address location = fwd.getFromLocationName(streetAddr, 1 ).get(0);
+
+        LatLng test = new LatLng(location.getLatitude(), location.getLongitude());
+        googleMap.addMarker(new MarkerOptions().position(test).title("Shoot location"));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(test, 10));
+    }
     /**
      * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
      */
-
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -194,18 +220,8 @@ public class Findtographer extends AppCompatActivity
      */
     @Override
     public void onConnected(Bundle connectionHint) {
-        // Provides a simple way of getting a device's location and is well suited for
-        // applications that do not require a fine-grained location and that do not need location
-        // updates. Gets the best and most recent location currently available, which may be null
-        // in rare cases when a location is not available.
+        // gets current location
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             return;
         }
@@ -214,7 +230,6 @@ public class Findtographer extends AppCompatActivity
             Log.i("something", mLastLocation.toString());
         else
             Log.i("something", "nothing");
-
     }
 
     @Override
@@ -224,7 +239,6 @@ public class Findtographer extends AppCompatActivity
         Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
     }
 
-
     @Override
     public void onConnectionSuspended(int cause) {
         // The connection to Google Play services was lost for some reason. We call connect() to
@@ -233,34 +247,18 @@ public class Findtographer extends AppCompatActivity
         mGoogleApiClient.connect();
     }
 
-
     /**
-     * Manipulates the map when it's available.
-     * The API invokes this callback when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user receives a prompt to install
-     * Play services inside the SupportMapFragment. The API invokes this method after the user has
-     * installed Google Play services and returned to the app.
+     * Manipulates the map when available.
      */
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case 0: {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
                     Log.i("permission", "yes");
                 } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
                     Log.e("permission", "no");
-
                 }
                 return;
             }
@@ -279,17 +277,8 @@ public class Findtographer extends AppCompatActivity
 
     @Override
     public void onMapReady(GoogleMap googleMapInput) {
-        // Add a marker in Sydney, Australia,
-        // and move the map's camera to the same location.
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             Log.e("maps", "no permission");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
             return;
@@ -299,9 +288,7 @@ public class Findtographer extends AppCompatActivity
             Log.i("check", "yes");
         else
             Log.i("check", "no");
-
         googleMap = googleMapInput;
-
         buildGoogleApiClient();
     }
 
@@ -316,11 +303,8 @@ public class Findtographer extends AppCompatActivity
             case R.id.buttonA:
 
                 if (mLastLocation != null) {
-
-                    googleMap.addMarker(new MarkerOptions().position(test).title("Marker in my parkingspot i always do"));
+                    googleMap.addMarker(new MarkerOptions().position(test).title("Shoot location"));
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(test, 18));
-
-
                     myRef.setValue(mLastLocation);
                 }
                 //sleep
@@ -333,22 +317,20 @@ public class Findtographer extends AppCompatActivity
                 callNotification(this);
                 break;
 
-
             // intent to call dialer
             case R.id.call:
                 Uri uri3 = Uri.parse("tel:5089511273");
-                Intent i3 = new Intent(Intent.ACTION_DIAL, uri3);
+                Intent i3 = new Intent(Intent.ACTION_CALL, uri3);
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
                 startActivity(i3);
                 break;
         }
-
     }
 
     // get current tab for switching tabs
-    public static TabHost getCurrentTab(){
+    public static TabHost getCurrentTab() {
         return tabs;
     }
 
@@ -360,7 +342,6 @@ public class Findtographer extends AppCompatActivity
         }
         return super.onKeyDown(keyCode, event);
     }
-
 
     public void showDatePickerDialog(View v) {
         DialogFragment newFragment = new DatePickerFragment();
@@ -390,11 +371,9 @@ public class Findtographer extends AppCompatActivity
 
         @Override
         public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-            int parkMonth = datePicker.getMonth();
-            int parkDay = datePicker.getDayOfMonth();
+            int month = datePicker.getMonth();
+            int day = datePicker.getDayOfMonth();
         }
-
-
     }
 
     public static class TimePickerFragment extends DialogFragment
@@ -412,15 +391,15 @@ public class Findtographer extends AppCompatActivity
             return new TimePickerDialog(getActivity(), this, hour, minute,
                     DateFormat.is24HourFormat(getActivity()));
         }
+
         @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void onTimeSet(TimePicker timePicker, int i, int i1) {
-            int parkHour = timePicker.getHour();
-            int parkMinute = timePicker.getMinute();
+            int hour = timePicker.getHour();
+            int minute = timePicker.getMinute();
 
         }
     }
-
 
     public void callNotification(Context context) {
         NotificationCompat.Builder mBuilder =
@@ -455,12 +434,7 @@ public class Findtographer extends AppCompatActivity
                 intent = new Intent(this, Login.class);
                 startActivity(intent);
                 break;
-
         }
         return true;
     }
-
-
-
-
 }

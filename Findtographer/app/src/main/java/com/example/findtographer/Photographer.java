@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +39,21 @@ public class Photographer extends AppCompatActivity {
         webview.setWebViewClient(new WebViewClient());
 
         url= (EditText) findViewById(R.id.portURL);
+
+        url.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int keyCode, KeyEvent event) {
+
+                /*TODO: progress bar */
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    webview.getSettings().setJavaScriptEnabled(true);
+                    webview.loadUrl(url.getText().toString());
+                    webview.setVisibility(VISIBLE);
+                    return true;
+                }
+                return false;
+            }
+        });
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

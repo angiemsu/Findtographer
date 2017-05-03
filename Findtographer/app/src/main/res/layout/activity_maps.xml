@@ -50,16 +50,18 @@
                             android:layout_height="wrap_content"
                             android:gravity="center"
                             android:text="@string/subintro"
+                            android:textSize="16dp"
                             android:textColor="#ff000000" />
 
                         <EditText
                             android:layout_width="0dp"
-                            android:layout_weight="0.75"
+                            android:layout_weight="0.7"
                             android:layout_height="wrap_content"
+                            android:id="@+id/city"
                             android:hint="your city"
                             android:inputType="textCapSentences"
                             android:paddingLeft="10dp"
-                            android:textSize="14dp"/>
+                            android:textSize="16dp"/>
 
 
                     </TableRow>
@@ -97,7 +99,7 @@
                             android:paddingBottom="5dp"
                             android:paddingTop="5dp"
                             android:text="@string/pick_date"
-                            android:textSize="12dp" />
+                            android:textSize="14dp" />
 
                         <Button
                             android:layout_width="0dp"
@@ -108,7 +110,7 @@
                             android:paddingBottom="5dp"
                             android:paddingTop="5dp"
                             android:text="@string/pick_time"
-                            android:textSize="12dp" />
+                            android:textSize="14dp" />
 
                     </TableRow>
 
