@@ -55,14 +55,17 @@
             android:background="#ffffff"
             android:gravity="center"
             android:hint="https://www.example.com"
-            android:paddingBottom="5dp"
+            android:paddingBottom="7dp"
+            android:textSize="16dp"
             android:textColor="#ff000000" />
 
         <TextView
             android:id="@+id/siteDesc"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#ffffff"
+            android:background="#79CDCD"
             android:gravity="center"
             android:textColor="#ff000000"
             android:visibility="gone"

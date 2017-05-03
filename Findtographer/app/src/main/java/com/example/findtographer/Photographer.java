@@ -54,7 +54,7 @@ public class Photographer extends AppCompatActivity {
             String title = (String) msg.obj;
 
            while (siteDesc.getText().toString() == "")
-               siteDesc.append(title + "\n" +"\n"); /* TODO: use json info for profile */
+               siteDesc.append(title); /* TODO: use json info for profile */
             siteDesc.setVisibility(View.VISIBLE);
         }
     };
@@ -74,6 +74,7 @@ public class Photographer extends AppCompatActivity {
 
         // background thread is json parser
         final Thread t = new Thread(background);
+
 
 
         url = (EditText) findViewById(R.id.portURL);
@@ -105,7 +106,6 @@ public class Photographer extends AppCompatActivity {
                         .setAction("Action", null).show();
 
                 t.start();
-
 
                 /* TODO: intent to profile view */
             }
