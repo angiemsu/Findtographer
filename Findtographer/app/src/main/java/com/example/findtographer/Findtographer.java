@@ -188,7 +188,7 @@ public class Findtographer extends AppCompatActivity
 
         LatLng test = new LatLng(location.getLatitude(), location.getLongitude());
         googleMap.addMarker(new MarkerOptions().position(test).title("Shoot location"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(test, 10));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(test, 16));
     }
     /**
      * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
@@ -304,7 +304,7 @@ public class Findtographer extends AppCompatActivity
 
                 if (mLastLocation != null) {
                     googleMap.addMarker(new MarkerOptions().position(test).title("Shoot location"));
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(test, 18));
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(test, 16));
                     myRef.setValue(mLastLocation);
                 }
                 //sleep
