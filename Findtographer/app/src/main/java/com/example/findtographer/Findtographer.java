@@ -22,6 +22,8 @@ import android.text.format.DateFormat;
 
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -159,10 +161,7 @@ public class Findtographer extends AppCompatActivity
                 return false;
             }
         });
-
-
     }
-
 
     /**
      * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
@@ -175,7 +174,6 @@ public class Findtographer extends AppCompatActivity
                 .addApi(LocationServices.API)
                 .build();
         mGoogleApiClient.connect();
-
     }
 
     @Override
@@ -339,15 +337,8 @@ public class Findtographer extends AppCompatActivity
             // intent to call dialer
             case R.id.call:
                 Uri uri3 = Uri.parse("tel:5089511273");
-                Intent i3 = new Intent(Intent.ACTION_CALL, uri3);
+                Intent i3 = new Intent(Intent.ACTION_DIAL, uri3);
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
                     return;
                 }
                 startActivity(i3);
@@ -431,19 +422,7 @@ public class Findtographer extends AppCompatActivity
     }
 
 
-    public void fetchDirections(String latitudeInput, String longitudeInput) throws MalformedURLException {
-        Log.i("lastfetchd",mLastLocation.toString());
-        String url = "https://maps.google.com/maps?saddr=" +
-        mLastLocation.getLatitude() +  "," + mLastLocation.getLongitude() +
-                "&daddr=" + latitudeInput + ","
-                + longitudeInput +
-                "&mode=walking";
-        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                Uri.parse(url));
-        startActivity(intent);
-    }
-
-    public void callNotification(Context context/* TODO: Location location */) {
+    public void callNotification(Context context) {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_stat_name)
@@ -453,6 +432,32 @@ public class Findtographer extends AppCompatActivity
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify("", 0, mBuilder.build());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu2, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
+        // Handle item selection
+        switch (item.getItemId()) {
+
+            case R.id.switchv:
+                intent = new Intent(this, Photographer.class);
+                startActivity(intent);
+                break;
+
+            case R.id.back:
+                intent = new Intent(this, Login.class);
+                startActivity(intent);
+                break;
+
+        }
+        return true;
     }
 
 

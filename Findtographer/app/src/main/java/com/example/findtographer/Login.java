@@ -33,6 +33,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         switch(view.getId()) {
             case R.id.buttonPho:
                 intent = new Intent(this, Photographer.class);
+
                 startActivity(intent);
                 break;
             case R.id.buttonCust:
